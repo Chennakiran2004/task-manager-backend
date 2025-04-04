@@ -233,6 +233,39 @@ const deleteList = async (req, res) => {
   }
 };
 
+const updateListName = async (req, res) => {
+  try {
+    const { boardId, listId } = req.params;
+    const { listName } = req.body;
+
+    const board = await Board.findById(boardId);
+    if (!board) {
+      return res.status(404).json({ message: "Board not found" });
+    }
+
+    const targetList = board.lists.find(
+      (list) => list._id.toString() === listId
+    );
+    if (!targetList) {
+      return res.status(404).json({ message: "List not found" });
+    }
+
+    targetList.listName = listName;
+    board.updatedAt = new Date();
+    await board.save();
+
+    return res.status(200).json({
+      message: "List name updated successfully",
+      updatedList: targetList,
+    });
+  } catch (error) {
+    console.error("Error updating list name:", error);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: error.message });
+  }
+};
+
 module.exports = {
   getAllBoards,
   createBoard,
@@ -241,4 +274,5 @@ module.exports = {
   getTasks,
   addTask,
   deleteList,
+  updateListName,
 };
